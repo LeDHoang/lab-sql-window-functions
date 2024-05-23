@@ -101,6 +101,7 @@ CREATE TEMPORARY TABLE IF NOT EXISTS retained_customers AS (
     GROUP BY 
         DATE_FORMAT(r1.rental_date, '%Y-%m')
 );
+-- 2nd way??
 -- Step 1: Create the eachmonth temporary table to store customer activity by month
 DROP table IF EXISTS eachmonth_detailed;
 
