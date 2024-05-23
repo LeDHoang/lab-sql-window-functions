@@ -102,24 +102,21 @@ CREATE TEMPORARY TABLE IF NOT EXISTS retained_customers AS (
         DATE_FORMAT(r1.rental_date, '%Y-%m')
 );
 -- 2nd way??
--- Step 1: Create the eachmonth temporary table to store customer activity by month
+-- Step 1: customer activity by month
 DROP table IF EXISTS eachmonth_detailed;
 
 CREATE TEMPORARY TABLE IF NOT EXISTS eachmonth_detailed AS (
     SELECT
         DATE_FORMAT(r.rental_date, '%Y-%m') AS Year_monthh,
         c.customer_id
-    FROM 
-        customer c
-    JOIN 
-        rental r ON c.customer_id = r.customer_id
-    GROUP BY 
-       c.customer_id, DATE_FORMAT(r.rental_date, '%Y-%m')
+    FROM customer c
+    JOIN rental r ON c.customer_id = r.customer_id
+    GROUP BY c.customer_id, DATE_FORMAT(r.rental_date, '%Y-%m')
 );
 
 SELECT * FROM eachmonth_detailed;
 
--- Step 2: Calculate retained customers using window functions
+-- Step 2: Calculate retained customers 
 CREATE TEMPORARY TABLE IF NOT EXISTS retained_customers2 AS (
     SELECT 
         current_month,
@@ -131,12 +128,8 @@ CREATE TEMPORARY TABLE IF NOT EXISTS retained_customers2 AS (
             customer_id,
             Year_monthh AS current_month,
             LAG(Year_monthh, 1) OVER (PARTITION BY customer_id ORDER BY Year_monthh) AS previous_month
-        FROM 
-            eachmonth_detailed
-    ) AS customer_activity
-    GROUP BY 
-        current_month
-);
+        FROM eachmonth_detailed) AS customer_activity
+    GROUP BY current_month);
 
 SELECT * FROM retained_customers;
 
