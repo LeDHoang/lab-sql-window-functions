@@ -115,8 +115,13 @@ CREATE TEMPORARY TABLE IF NOT EXISTS eachmonth_detailed AS (
 );
 
 SELECT * FROM eachmonth_detailed;
-
+SELECT 
+            customer_id,
+            Year_monthh AS current_month,
+            LAG(Year_monthh, 1) OVER (PARTITION BY customer_id ORDER BY Year_monthh) AS previous_month -- get previous month
+        FROM eachmonth_detailed;
 -- Step 2: Calculate retained customers 
+DROP TABLE retained_customers2;
 CREATE TEMPORARY TABLE IF NOT EXISTS retained_customers2 AS (
     SELECT 
         current_month,
@@ -127,7 +132,7 @@ CREATE TEMPORARY TABLE IF NOT EXISTS retained_customers2 AS (
         SELECT 
             customer_id,
             Year_monthh AS current_month,
-            LAG(Year_monthh, 1) OVER (PARTITION BY customer_id ORDER BY Year_monthh) AS previous_month
+            LAG(Year_monthh, 1) OVER (PARTITION BY customer_id ORDER BY Year_monthh) AS previous_month -- get previous month
         FROM eachmonth_detailed) AS customer_activity
     GROUP BY current_month);
 
